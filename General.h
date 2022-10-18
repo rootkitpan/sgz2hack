@@ -6,7 +6,6 @@
 using namespace std;
 
 typedef struct _GENERAL {
-	unsigned short no;
 
 	unsigned char name1[7];			/* ÎÄ×Ö */
 	wchar_t name1_display[4];		/* ÎÄ×Ö */
@@ -27,6 +26,21 @@ typedef struct _GENERAL {
 	unsigned char portrait;		/* auto-join */
 
 	unsigned char loyalty[6];	/* init loyalty */
+
+	unsigned char appear_year;
+	unsigned char auto_join;
+	unsigned char appear_city[6];
+	unsigned short no;
+	unsigned short next[6];
+	unsigned char lord_flag[6];
+	unsigned char advisor_flag[6];
+	unsigned char hide_flag[6];
+	unsigned char governor_flag[6];
+	unsigned char last_flag[6];
+	unsigned char first_flag[6];
+	unsigned char end_flag[6];
+
+
 
 }GENERAL, *PGENERAL;
 

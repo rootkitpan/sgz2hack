@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 #include <Windows.h>
 #include "sgz2image.h"
@@ -80,7 +81,8 @@ SGZ2Image::SGZ2Image(unsigned char* buf, int width, int height)
 		}
 	}
 
-
+	palette_index = new unsigned char[width * height];
+	cdata = new unsigned short[data_width * data_height];
 }
 
 
@@ -130,11 +132,71 @@ void SGZ2Image::Show() const
 	SetConsoleTextAttribute(handle, 0);
 }
 
+void SGZ2Image::ToBMP() const
+{
+	BITMAPFILEHEADER header;
+
+	header.bfType = 'MB';
+	header.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 32 * 40 * 2;		// 
+	header.bfReserved1 = 0;
+	header.bfReserved2 = 0;
+	header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+	BITMAPINFOHEADER info;
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	info.biWidth = width * 8;
+	info.biHeight = -height * 8;
+	info.biPlanes = 1;
+	info.biBitCount = 16;
+	info.biCompression = 0;
+	info.biSizeImage = 0;
+	info.biXPelsPerMeter = 0;
+	info.biYPelsPerMeter = 0;
+	info.biClrUsed = 0;
+	info.biClrImportant = 0;
+
+	// no palette for 16 colordeep
+
+	// data
+	for (int i = 0; i < 32 * 40; i++) {
+		int x = i % (width * 8);
+		int y = i / (width * 8);
+		int tile_x = x / 8;
+		int tile_y = y / 8;
+		int tile_index = tile_y * width + tile_x;
+		int pi = palette_index[tile_index];
+		PALETTE p = palette_group->p[pi];
+		unsigned short v = p.pc[data[i]].v;
+		cdata[i] = v;
+	}
+
+	ofstream of;
+	of.open("C:\\work\\sgz2\\test.bmp", ios::out | ios::binary);
+	if (of.fail()) {
+		cout << "errno = " << errno << endl;
+		return;
+	}
+	of.write((char*)&header, sizeof(BITMAPFILEHEADER));
+	of.write((char*)&info, sizeof(BITMAPINFOHEADER));
+	of.write((char*)cdata, 32 * 40 * 2);
+	of.close();
+
+
+}
+
+void SGZ2Image::SetPaletteGroup(PPALETTE_GROUP p)
+{
+	palette_group = p;
+}
+
+void SGZ2Image::SetPaletteIndex(unsigned char* p)
+{
+	memcpy(palette_index, p, height * width);
+}
 
 Portrait::Portrait(unsigned char* buf)
 	: SGZ2Image(buf, 4, 5)
 {
-
 }
 
 /*******************************************************************/

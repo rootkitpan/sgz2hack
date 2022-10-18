@@ -8,7 +8,7 @@ General::General()
 {
 	this->generals = new GENERAL[this->GENERAL_COUNT];
 	for (int i = 0; i < this->GENERAL_COUNT; i++) {
-		this->generals[i].no = i + 1;
+		this->generals[i].no = i;
 	}
 }
 
@@ -56,9 +56,13 @@ wostream& operator<<(wostream& os, General& g)
 		os << setw(3) << g[i].birth_year << " ";
 		os << setw(3) << g[i].portrait << " ";
 
+#if 0
 		for (int j = 0; j < 6; j++) {
 			os << setw(3) << g[i].loyalty[j] << " ";
 		}
+#else
+		os << setw(3) << g[i].loyalty[0] << " ";
+#endif
 
 
 		os << endl;
