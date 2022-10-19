@@ -132,32 +132,69 @@ void SGZ2Image::Show() const
 	SetConsoleTextAttribute(handle, 0);
 }
 
+unsigned short SGZ2Image::SwapBGR2RGB(unsigned short bgr)
+{
+	unsigned short rgb = 0;
+	unsigned short v1 = (bgr & 0x7C00) >> 10;
+	unsigned short v2 = (bgr & 0x03E0) >> 5;
+	unsigned short v3 = bgr & 0x001F;
+
+	rgb = (v1) | (v2 << 5) | (v3 << 10);
+
+	return rgb;
+}
+
+void SGZ2Image::SetFileName(char* fn)
+{
+	memcpy(file_name, fn, strlen(fn) + 1);
+}
+
+
 void SGZ2Image::ToBMP() const
 {
 	BITMAPFILEHEADER header;
 
+	/* 0x00 */
 	header.bfType = 'MB';
+	/* 0x02 */
 	header.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 32 * 40 * 2;		// 
+	/* 0x06 */
 	header.bfReserved1 = 0;
+	/* 0x08 */
 	header.bfReserved2 = 0;
+	/* 0x0A */
 	header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
+
+
 	BITMAPINFOHEADER info;
+	/* 0x0E */
 	info.biSize = sizeof(BITMAPINFOHEADER);
+	/* 0x12 */
 	info.biWidth = width * 8;
+	/* 0x16 */
 	info.biHeight = -height * 8;
+	/* 0x1A */
 	info.biPlanes = 1;
+	/* 0x1C */
 	info.biBitCount = 16;
-	info.biCompression = 0;
+	/* 0x1E */
+	info.biCompression = BI_RGB;
+	/* 0x22 */
 	info.biSizeImage = 0;
+	/* 0x26 */
 	info.biXPelsPerMeter = 0;
+	/* 0x2A */
 	info.biYPelsPerMeter = 0;
+	/* 0x2D */
 	info.biClrUsed = 0;
+	/* 0x32 */
 	info.biClrImportant = 0;
 
 	// no palette for 16 colordeep
 
 	// data
+	/* 0x36 */
 	for (int i = 0; i < 32 * 40; i++) {
 		int x = i % (width * 8);
 		int y = i / (width * 8);
@@ -168,10 +205,15 @@ void SGZ2Image::ToBMP() const
 		PALETTE p = palette_group->p[pi];
 		unsigned short v = p.pc[data[i]].v;
 		cdata[i] = v;
+
+		cdata[i] = SGZ2Image::SwapBGR2RGB(cdata[i]);
+
 	}
 
+	char FileName[MAX_PATH];
+	sprintf_s(FileName, "C:\\work\\sgz2\\src\\pic\\%s.bmp", file_name);
 	ofstream of;
-	of.open("C:\\work\\sgz2\\test.bmp", ios::out | ios::binary);
+	of.open(FileName, ios::out | ios::binary);
 	if (of.fail()) {
 		cout << "errno = " << errno << endl;
 		return;

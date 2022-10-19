@@ -75,7 +75,7 @@ void Parse::PerformParse()
 	//wcout << scenario;
 	//wcout << city;
 	//portrait[0]->Show();
-#if 1
+#if 0
 	unsigned short v = pg[7].p[6].pc[1].v;
 	unsigned short r = pg[7].p[6].pc[1].r;
 	unsigned short g = pg[7].p[6].pc[1].g;
@@ -85,9 +85,17 @@ void Parse::PerformParse()
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
 		portrait[i]->SetPaletteGroup(&pg[7]);
+
+		char file_name[260];
+		sprintf_s(file_name, "potrait%03d", i);
+		portrait[i]->SetFileName(file_name);
 	}
-	portrait[0]->ToBMP();
-	portrait[0]->Show();
+
+
+	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
+		portrait[i]->ToBMP();
+		//portrait[0]->Show();
+	}
 
 
 }

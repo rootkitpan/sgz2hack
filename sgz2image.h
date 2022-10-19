@@ -42,9 +42,12 @@ private:
 	unsigned char* palette_index;
 	unsigned short* cdata;	// data + palette --> cdata
 
+
 public:
 	int width;		/* in tiles */
 	int height;		/* in tiles */
+
+	char file_name[260];		// used for bmp
 
 
 	SGZ2Image(unsigned char* buf, int width, int height);
@@ -55,6 +58,10 @@ public:
 
 	void SetPaletteGroup(PPALETTE_GROUP p);
 	void SetPaletteIndex(unsigned char* p);
+
+	void SetFileName(char* fn);
+
+	static unsigned short SwapBGR2RGB(unsigned short bgr);
 };
 
 
