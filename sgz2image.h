@@ -8,6 +8,7 @@ private:
 	unsigned char GetBitFront(unsigned char data, int i);
 
 public:
+	Tile();
 	void Convert2Tile(unsigned char* buf);
 	unsigned char GetData(int i, int j);
 };
@@ -35,40 +36,41 @@ typedef union _PALETTE_GROUP {
 
 class SGZ2Image {
 private:
-	Tile* tiles;
-	unsigned char* data;
-
-	PPALETTE_GROUP palette_group;
-	unsigned char* palette_index;
-	unsigned short* cdata;	// data + palette --> cdata
-
-
-public:
 	int width;		/* in tiles */
 	int height;		/* in tiles */
 
 	char file_name[260];		// used for bmp
 
+	Tile* tiles;
+	unsigned char* data;
 
-	SGZ2Image(unsigned char* buf, int width, int height);
-	~SGZ2Image();
+	PPALETTE_GROUP palette_group;
+	unsigned char* palette_index;
 
-	void Show() const;
-	void ToBMP() const;
-
-	void SetPaletteGroup(PPALETTE_GROUP p);
-	void SetPaletteIndex(unsigned char* p);
-
-	void SetFileName(char* fn);
+	unsigned short* cdata;	// data + palette --> cdata
 
 	static unsigned short SwapBGR2RGB(unsigned short bgr);
+
+public:
+	SGZ2Image(int width, int height);
+	~SGZ2Image();
+
+	void setData(unsigned char* d);
+
+	void setFileName(char* fn);
+
+	void setPaletteGroup(PPALETTE_GROUP p);
+	void setPaletteIndex(unsigned char* p);
+
+	void show() const;
+	void toBMP() const;
 };
 
 
 class Portrait : public SGZ2Image {
 public:
 	static const int POITRAIT_COUNT = 256;
-	Portrait(unsigned char* buf);
+	Portrait();
 };
 
 /* ******************************************************************* */

@@ -7,6 +7,15 @@
 
 using namespace std;
 
+Tile::Tile()
+{
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			data[i][j] = 0;
+		}
+	}
+}
+
 void Tile::Convert2Tile(unsigned char* buf)
 {
 	for (int y = 0; y < 8; y++) {
@@ -19,7 +28,6 @@ void Tile::Convert2Tile(unsigned char* buf)
 		}
 	}
 }
-
 
 unsigned char Tile::GetBitFront(unsigned char data, int i)
 {
@@ -38,21 +46,55 @@ unsigned char Tile::GetData(int i, int j)
 }
 
 
-SGZ2Image::SGZ2Image(unsigned char* buf, int width, int height)
+
+
+SGZ2Image::SGZ2Image(int width, int height)
+{
+	this->width = width;
+	this->height = height;
+	memset(file_name, 0, 260);
+
+	tiles = new Tile[width * height];
+
+	int data_width = width * 8;
+	int data_height = height * 8;
+	data = new unsigned char[data_width * data_height];
+	for (int i = 0; i < data_width * data_height; i++) {
+		data[i] = 0;
+	}
+
+	palette_group = NULL;
+
+	palette_index = new unsigned char[width * height];
+	for (int i = 0; i < width * height; i++) {
+		palette_index[i] = 0;
+	}
+
+	cdata = new unsigned short[data_width * data_height];
+	for (int i = 0; i < data_width * data_height; i++) {
+		cdata[i] = 0;
+	}
+}
+
+
+SGZ2Image::~SGZ2Image()
+{
+	delete tiles;
+	delete data;
+	delete palette_index;
+	delete cdata;
+}
+
+void SGZ2Image::setData(unsigned char* d)
 {
 	int offset = 0;
 	int index = 0;
-
-	this->width = width;
-	this->height = height;
-
-	tiles = new Tile[width * height];
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			index = y * width + x;
 			offset = index * 16;
-			tiles[index].Convert2Tile(&buf[offset]);
+			tiles[index].Convert2Tile(&d[offset]);
 		}
 	}
 
@@ -80,20 +122,14 @@ SGZ2Image::SGZ2Image(unsigned char* buf, int width, int height)
 			data[data_offset] = value;
 		}
 	}
-
-	palette_index = new unsigned char[width * height];
-	cdata = new unsigned short[data_width * data_height];
 }
 
-
-SGZ2Image::~SGZ2Image()
+void SGZ2Image::setFileName(char* fn)
 {
-	delete tiles;
-	delete data;
+	memcpy(file_name, fn, strlen(fn) + 1);
 }
 
-
-void SGZ2Image::Show() const
+void SGZ2Image::show() const
 {
 	int data_width = width * 8;
 	int data_height = height * 8;
@@ -144,13 +180,17 @@ unsigned short SGZ2Image::SwapBGR2RGB(unsigned short bgr)
 	return rgb;
 }
 
-void SGZ2Image::SetFileName(char* fn)
+void SGZ2Image::setPaletteGroup(PPALETTE_GROUP p)
 {
-	memcpy(file_name, fn, strlen(fn) + 1);
+	palette_group = p;
 }
 
+void SGZ2Image::setPaletteIndex(unsigned char* p)
+{
+	memcpy(palette_index, p, height * width);
+}
 
-void SGZ2Image::ToBMP() const
+void SGZ2Image::toBMP() const
 {
 	BITMAPFILEHEADER header;
 
@@ -226,18 +266,9 @@ void SGZ2Image::ToBMP() const
 
 }
 
-void SGZ2Image::SetPaletteGroup(PPALETTE_GROUP p)
-{
-	palette_group = p;
-}
 
-void SGZ2Image::SetPaletteIndex(unsigned char* p)
-{
-	memcpy(palette_index, p, height * width);
-}
-
-Portrait::Portrait(unsigned char* buf)
-	: SGZ2Image(buf, 4, 5)
+Portrait::Portrait()
+	: SGZ2Image(4, 5)
 {
 }
 

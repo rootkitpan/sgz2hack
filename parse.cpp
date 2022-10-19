@@ -14,11 +14,23 @@ Parse::Parse(unsigned char* buf, int size)
 	memcpy(rom, buf, size);
 
 	setlocale(LC_ALL, "");
+
+	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
+		portrait[i] = new Portrait();
+
+		char file_name[260];
+		sprintf_s(file_name, "potrait%03d", i);
+		portrait[i]->setFileName(file_name);
+	}
 }
 
 Parse::~Parse()
 {
 	delete rom;
+
+	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
+		delete portrait[i];
+	}
 }
 
 void Parse::PerformParse()
@@ -61,6 +73,7 @@ void Parse::PerformParse()
 	parse_98000_99400();
 	//parse_99400_9A000(); all 0
 	parse_9A000_9B400();
+	//parse_9B400_9C000();
 
 
 
@@ -84,17 +97,13 @@ void Parse::PerformParse()
 #endif
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		portrait[i]->SetPaletteGroup(&pg[7]);
-
-		char file_name[260];
-		sprintf_s(file_name, "potrait%03d", i);
-		portrait[i]->SetFileName(file_name);
+		portrait[i]->setPaletteGroup(&pg[7]);
 	}
 
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		portrait[i]->ToBMP();
-		//portrait[0]->Show();
+		portrait[i]->toBMP();
+		//portrait[0]->show();
 	}
 
 
@@ -310,7 +319,7 @@ void Parse::parse_84000_87C00()
 
 	for (int i = 0; i < 48; i++) {
 		offset = start + i * 320;
-		portrait[i] = new Portrait(&rom[offset]);
+		portrait[i]->setData(&rom[offset]);
 	}
 }
 
@@ -321,7 +330,7 @@ void Parse::parse_88000_8BC00()
 
 	for (int i = 0; i < 48; i++) {
 		offset = start + i * 320;
-		portrait[i+48] = new Portrait(&rom[offset]);
+		portrait[i+48]->setData(&rom[offset]);
 	}
 }
 
@@ -332,7 +341,7 @@ void Parse::parse_8C000_8FC00()
 
 	for (int i = 0; i < 48; i++) {
 		offset = start + i * 320;
-		portrait[i + 96] = new Portrait(&rom[offset]);
+		portrait[i + 96]->setData(&rom[offset]);
 	}
 }
 
@@ -343,7 +352,7 @@ void Parse::parse_90000_93C00()
 
 	for (int i = 0; i < 48; i++) {
 		offset = start + i * 320;
-		portrait[i + 48 * 3] = new Portrait(&rom[offset]);
+		portrait[i + 48 * 3]->setData(&rom[offset]);
 	}
 }
 
@@ -354,7 +363,7 @@ void Parse::parse_94000_97C00()
 
 	for (int i = 0; i < 48; i++) {
 		offset = start + i * 320;
-		portrait[i + 48 * 4] = new Portrait(&rom[offset]);
+		portrait[i + 48 * 4]->setData(&rom[offset]);
 	}
 }
 
@@ -365,7 +374,7 @@ void Parse::parse_98000_99400()
 
 	for (int i = 0; i < 16; i++) {
 		offset = start + i * 320;
-		portrait[i + 48 * 5] = new Portrait(&rom[offset]);
+		portrait[i + 48 * 5]->setData(&rom[offset]);
 	}
 }
 
@@ -376,7 +385,7 @@ void Parse::parse_9A000_9B400()
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
 		offset = start + i * 20;
-		portrait[i]->SetPaletteIndex(&rom[offset]);
+		portrait[i]->setPaletteIndex(&rom[offset]);
 	}
 }
 
