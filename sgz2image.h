@@ -49,8 +49,6 @@ private:
 
 	unsigned short* cdata;	// data + palette --> cdata
 
-	static unsigned short SwapBGR2RGB(unsigned short bgr);
-
 public:
 	SGZ2Image(int width, int height);
 	~SGZ2Image();
@@ -64,6 +62,8 @@ public:
 
 	void show() const;
 	void toBMP() const;
+
+	static unsigned short SwapBGR2RGB(unsigned short bgr);
 };
 
 
@@ -71,6 +71,29 @@ class Portrait : public SGZ2Image {
 public:
 	static const int POITRAIT_COUNT = 256;
 	Portrait();
+};
+
+class Map
+{
+private:
+	int width;		/* in tiles */
+	int height;		/* in tiles */
+
+	unsigned char tile_index[20][14];
+
+	char file_name[260];		// used for bmp
+
+	PALETTE palette;
+
+	Tile base_tile[66];			// 0x35-0x76  0x42ÖÖ
+
+	unsigned short cdata[160][112];		// data + color --> cdata
+
+public:
+	Map();
+	void setTileIndex(unsigned char* ti);
+	void setBaseTile(unsigned char* buf);
+	void toBMP();
 };
 
 /* ******************************************************************* */
@@ -108,7 +131,7 @@ public:
 };
 
 /*
-	¤Î	
+	
 
 */
 

@@ -262,8 +262,6 @@ void SGZ2Image::toBMP() const
 	of.write((char*)&info, sizeof(BITMAPINFOHEADER));
 	of.write((char*)cdata, 32 * 40 * 2);
 	of.close();
-
-
 }
 
 
@@ -271,6 +269,135 @@ Portrait::Portrait()
 	: SGZ2Image(4, 5)
 {
 }
+
+
+Map::Map()
+{
+	width = 20;
+	height = 14;
+
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			tile_index[i][j] = 0;
+		}
+	}
+
+	char fn[] = "map";
+	memcpy(file_name, fn, strlen(fn) + 1);
+
+	palette.pc[0].v = 0x7F95;
+	palette.pc[1].v = 0x322C;
+	palette.pc[2].v = 0x0120;
+	palette.pc[3].v = 0x0080;
+
+	for (int i = 0; i < 160; i++) {
+		for (int j = 0; j < 112; j++) {
+			cdata[i][j] = 0;
+		}
+	}
+}
+
+void Map::setTileIndex(unsigned char* ti)
+{
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			tile_index[j][i] = *(ti + i * width + j) - 0x35;
+		}
+	}
+
+#if 0
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			cout << hex << (int)(tile_index[j][i] + 0x35);
+		}
+		cout << endl;
+	}
+#endif
+}
+
+void Map::setBaseTile(unsigned char* buf)
+{
+	int offset = 0;
+
+	for (int i = 0; i < 66; i++) {
+		offset = i * 16;
+		base_tile[i].Convert2Tile(&buf[offset]);
+	}
+}
+
+void Map::toBMP()
+{
+	BITMAPFILEHEADER header;
+
+	/* 0x00 */
+	header.bfType = 'MB';
+	/* 0x02 */
+	header.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + 160 * 112 * 2;
+	/* 0x06 */
+	header.bfReserved1 = 0;
+	/* 0x08 */
+	header.bfReserved2 = 0;
+	/* 0x0A */
+	header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+
+
+	BITMAPINFOHEADER info;
+	/* 0x0E */
+	info.biSize = sizeof(BITMAPINFOHEADER);
+	/* 0x12 */
+	info.biWidth = width * 8;
+	/* 0x16 */
+	info.biHeight = -height * 8;
+	/* 0x1A */
+	info.biPlanes = 1;
+	/* 0x1C */
+	info.biBitCount = 16;
+	/* 0x1E */
+	info.biCompression = BI_RGB;
+	/* 0x22 */
+	info.biSizeImage = 0;
+	/* 0x26 */
+	info.biXPelsPerMeter = 0;
+	/* 0x2A */
+	info.biYPelsPerMeter = 0;
+	/* 0x2D */
+	info.biClrUsed = 0;
+	/* 0x32 */
+	info.biClrImportant = 0;
+
+	// no palette for 16 colordeep
+
+	// data
+	/* 0x36 */
+	for (int y = 0; y < 112; y++) {
+		for (int x = 0; x < 160; x++) {
+			int tile_x = x / 8;
+			int tile_y = y / 8;
+			int ti = tile_index[tile_x][tile_y];
+			int x_in_tile = x % 8;
+			int y_in_tile = y % 8;
+			unsigned char data = base_tile[ti].GetData(x_in_tile, y_in_tile);
+
+			unsigned short v = palette.pc[data].v;
+			cdata[x][y] = SGZ2Image::SwapBGR2RGB(v);
+		}
+	}
+
+	char FileName[MAX_PATH];
+	sprintf_s(FileName, "C:\\work\\sgz2\\src\\pic\\%s.bmp", file_name);
+	ofstream of;
+	of.open(FileName, ios::out | ios::binary);
+	if (of.fail()) {
+		cout << "errno = " << errno << endl;
+		return;
+	}
+	of.write((char*)&header, sizeof(BITMAPFILEHEADER));
+	of.write((char*)&info, sizeof(BITMAPINFOHEADER));
+	of.write((char*)cdata, 160 * 112 * 2);
+	of.close();
+}
+
 
 /*******************************************************************/
 
@@ -402,7 +529,4 @@ CharDot::CharDot(unsigned char* buf)
 {
 
 }
-
-
-
 

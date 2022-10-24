@@ -53,6 +53,8 @@ void Parse::PerformParse()
 	parse_6E380_6E7A0();
 	//parse_6E7A0_70000(); all 0
 
+	parse_7445B_74573();
+
 	parse_7981B_7B65B();
 
 	parse_7B693_7B789();
@@ -74,6 +76,7 @@ void Parse::PerformParse()
 	//parse_99400_9A000(); all 0
 	parse_9A000_9B400();
 	//parse_9B400_9C000();
+	parse_9C000_9C420();
 
 
 
@@ -102,9 +105,13 @@ void Parse::PerformParse()
 
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		portrait[i]->toBMP();
+		//portrait[i]->toBMP();
 		//portrait[0]->show();
 	}
+
+	map.toBMP();
+
+
 
 
 }
@@ -235,6 +242,13 @@ void Parse::parse_6E380_6E7A0()
 		general[i].war = rom[offset + 1];
 		general[i].charm = rom[offset + 2];	
 	}
+}
+
+void Parse::parse_7445B_74573()
+{
+	int start = 0x7445B;
+	
+	map.setTileIndex(&rom[start]);
 }
 
 void Parse::parse_7981B_7B65B()
@@ -388,6 +402,14 @@ void Parse::parse_9A000_9B400()
 		portrait[i]->setPaletteIndex(&rom[offset]);
 	}
 }
+
+void Parse::parse_9C000_9C420()
+{
+	int start = 0x9C000;
+
+	map.setBaseTile(&rom[start]);
+}
+
 
 
 
