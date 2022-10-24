@@ -109,7 +109,7 @@ void Parse::PerformParse()
 		//portrait[0]->show();
 	}
 
-	map.toBMP();
+	//map.toBMP();
 
 
 

@@ -394,7 +394,11 @@ void Map::toBMP()
 	}
 	of.write((char*)&header, sizeof(BITMAPFILEHEADER));
 	of.write((char*)&info, sizeof(BITMAPINFOHEADER));
-	of.write((char*)cdata, 160 * 112 * 2);
+	for (int y = 0; y < 112; y++) {
+		for (int x = 0; x < 160; x++) {
+			of.write((char*) & cdata[x][y], 2);
+		}
+	}
 	of.close();
 }
 
