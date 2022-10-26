@@ -20,6 +20,7 @@ private:
 	class City city;
 	PALETTE_GROUP pg[PALETTE_GROUP_COUNT];
 	Map map;
+	SmallFlag sflag[16];
 
 	void parse_598CD_5990D();
 	void parse_5C250_5CEB0();
@@ -42,6 +43,7 @@ private:
 	void parse_98000_99400();
 	void parse_9A000_9B400();
 	void parse_9C000_9C420();
+	void parse_9C420_9C520();
 
 
 	void parse_sentense(int start, int end);

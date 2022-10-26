@@ -2,18 +2,7 @@
 #define _SGZ2IMAGE_H_
 
 
-class Tile {
-private:
-	unsigned char data[8][8];
-	unsigned char GetBitFront(unsigned char data, int i);
-
-public:
-	Tile();
-	void Convert2Tile(unsigned char* buf);
-	unsigned char GetData(int i, int j);
-};
-
-
+/* one color */
 typedef union _PALETTE_COLOR {
 	unsigned short v;
 	struct {
@@ -24,41 +13,68 @@ typedef union _PALETTE_COLOR {
 	};
 } PALETTE_COLOR, * PPALETTE_COLOR;
 
+/* one palette consists of 4 colors */
 typedef union _PALETTE {
 	PALETTE_COLOR pc[4];
 } PALETTE, * PPALETTE;
 
+/* one palette group consists of 8 palettes */
 typedef union _PALETTE_GROUP {
 	PALETTE p[8];
 } PALETTE_GROUP, * PPALETTE_GROUP;
 
 #define PALETTE_GROUP_COUNT 8
 
+
+class Tile {
+private:
+	unsigned char data[8][8];
+	unsigned char GetBitFront(unsigned char data, int i);
+	PALETTE palette;
+
+public:
+	static const int TILE_WIDTH = 8;
+	static const int TILE_HEIGHT = 8;
+	Tile();
+	void setData(unsigned char* buf);		/* 16bytes ==> data[8][8]*/
+	unsigned char getData(int x, int y) const;
+	void setPalette(PPALETTE p);
+	unsigned short getcData(int x, int y) const;
+
+	void show() const;
+};
+
+
+
 class SGZ2Image {
 private:
-	int width;		/* in tiles */
-	int height;		/* in tiles */
+	int width;				/* width in tiles */
+	int height;				/* height in tiles */
 
-	char file_name[260];		// used for bmp
+	int pixel_width;		/* width in pixels = width * 8 */
+	int pixel_height;		/* height in pixels = height * 8 */
 
-	Tile* tiles;
-	unsigned char* data;
+	char file_name[260];	/* used for bmp file name */
 
-	PPALETTE_GROUP palette_group;
-	unsigned char* palette_index;
+	Tile* tiles;			/* tiles[width * height] <= = > tiles[width][height] */
 
-	unsigned short* cdata;	// data + palette --> cdata
+	int getTileIndex(int x, int y) const;
+
 
 public:
 	SGZ2Image(int width, int height);
 	~SGZ2Image();
 
+	void setData(int tile_index, unsigned char* d);
+	void setData(int tile_x, int tile_y, unsigned char* d);
 	void setData(unsigned char* d);
 
-	void setFileName(char* fn);
+	unsigned char getData(int x, int y) const;
+	unsigned short getcData(int x, int y) const;
 
-	void setPaletteGroup(PPALETTE_GROUP p);
-	void setPaletteIndex(unsigned char* p);
+	void setFileName(const char* fn);
+
+	void setPalette(int tile_index, PPALETTE p);
 
 	void show() const;
 	void toBMP() const;
@@ -94,6 +110,13 @@ public:
 	void setTileIndex(unsigned char* ti);
 	void setBaseTile(unsigned char* buf);
 	void toBMP();
+};
+
+
+class SmallFlag : public SGZ2Image {
+public:
+	static const int SMALL_FLAG_COUNT = 16;
+	SmallFlag();
 };
 
 /* ******************************************************************* */

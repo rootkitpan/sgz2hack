@@ -77,6 +77,7 @@ void Parse::PerformParse()
 	parse_9A000_9B400();
 	//parse_9B400_9C000();
 	parse_9C000_9C420();
+	parse_9C420_9C520();
 
 
 
@@ -99,14 +100,13 @@ void Parse::PerformParse()
 	unsigned short rsvd = pg[7].p[6].pc[1].rsvd;
 #endif
 
-	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		portrait[i]->setPaletteGroup(&pg[7]);
-	}
+	
 
-
+	//portrait[0]->show();
+	//portrait[0]->toBMP();
+	portrait[1]->toBMP();
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		//portrait[i]->toBMP();
-		//portrait[0]->show();
+		portrait[i]->toBMP();
 	}
 
 	//map.toBMP();
@@ -396,10 +396,14 @@ void Parse::parse_9A000_9B400()
 {
 	int start = 0x9A000;
 	int offset = 0;
+	int palette_index = 0;
 
 	for (int i = 0; i < Portrait::POITRAIT_COUNT; i++) {
-		offset = start + i * 20;
-		portrait[i]->setPaletteIndex(&rom[offset]);
+		for (int j = 0; j < 20; j++) {
+			offset = start + i * 20 + j;
+			palette_index = rom[offset];
+			portrait[i]->setPalette(j, &pg[7].p[palette_index]);
+		}
 	}
 }
 
@@ -410,7 +414,16 @@ void Parse::parse_9C000_9C420()
 	map.setBaseTile(&rom[start]);
 }
 
+void Parse::parse_9C420_9C520()
+{
+	int start = 0x9C420;
+	int offset = 0;
 
+	for (int i = 0; i < SmallFlag::SMALL_FLAG_COUNT; i++) {
+		offset = start + i * 16;
+		sflag[i].setData(&rom[offset]);
+	}
+}
 
 
 void Parse::parse_sentense(int start, int end)
